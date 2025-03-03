@@ -17,11 +17,16 @@ class HomeScreen extends StatelessWidget {
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
           children: [
-            _menuCard(context, "Traditional Hindi Keyboard", KeyboardScreen()),
+            _menuCard(
+                context,
+                "Traditional Hindi Keyboard",
+                KeyboardScreen(
+                  isPhonetic: false,
+                )),
             _menuCard(context, "Phonetic Hindi Keyboard",
                 KeyboardScreen(isPhonetic: true)),
             _menuCard(context, "Voice Typing", VoiceTypingScreen()),
-            _menuCard(context, "Handwriting Recognition", HandwritingScreen()),
+            _menuCard(context, "Handwriting", HandwritingScreen()),
             _menuCard(context, "Settings", SettingsScreen()),
           ],
         ),
@@ -57,3 +62,57 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+
+// import 'package:flutter/material.dart';
+// import 'package:get/get.dart';
+// import 'package:key_board_app/App%20UI/HandWritingScreen.dart';
+// import 'package:key_board_app/App%20UI/KeyboardScreen.dart';
+// import 'package:key_board_app/App%20UI/SettingsScreen.dart';
+// import 'package:key_board_app/App%20UI/VoiceTypingScreen.dart';
+// import 'package:flutter/material.dart';
+// import 'package:get/get.dart';
+
+// class HomeScreen extends StatelessWidget {
+//   // final HomeController controller = Get.put(HomeController());
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: const Text("Hindi Keyboard")),
+//       body: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Column(
+//           children: [
+//             const Text("Master Hindi typing with ease!",
+//                 style: TextStyle(fontSize: 18)),
+//             const SizedBox(height: 20),
+//             _buildMenuItem(
+//                 "Traditional Keyboard",
+//                 () => Get.to(() => KeyboardScreen(
+//                       isPhonetic: false,
+//                     ))),
+//             _buildMenuItem("Phonetic Keyboard",
+//                 () => Get.to(() => KeyboardScreen(isPhonetic: true))),
+//             _buildMenuItem(
+//                 "Voice Typing", () => Get.to(() => VoiceTypingScreen())),
+//             _buildMenuItem("Handwriting Recognition",
+//                 () => Get.to(() => HandwritingScreen())),
+//             _buildMenuItem("Settings", () => Get.to(() => SettingsScreen())),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildMenuItem(String title, VoidCallback onTap) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 8),
+//       child: ElevatedButton(
+//         onPressed: onTap,
+//         style: ElevatedButton.styleFrom(
+//             minimumSize: const Size(double.infinity, 50)),
+//         child: Text(title, style: const TextStyle(fontSize: 16)),
+//       ),
+//     );
+//   }
+// }

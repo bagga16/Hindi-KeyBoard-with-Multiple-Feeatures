@@ -41,6 +41,10 @@ dependencies:
   flutter_localization: ^0.3.1
   image_picker: ^1.1.2
   flutter_plugin_android_lifecycle: ^2.0.15
+  path_provider: ^2.1.5
+  flutter_tts: ^4.2.2
+  get: ^4.7.2
+  dart_levenshtein: ^1.0.1
 
 dev_dependencies:
   flutter_test:

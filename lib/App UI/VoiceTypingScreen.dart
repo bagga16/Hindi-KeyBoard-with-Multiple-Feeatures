@@ -1,34 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:key_board_app/Services/SpeechService.dart';
+import 'package:get/get.dart';
+import 'package:key_board_app/Services/voice%20typing%20controller.dart';
 
-class VoiceTypingScreen extends StatefulWidget {
-  @override
-  _VoiceTypingScreenState createState() => _VoiceTypingScreenState();
-}
-
-class _VoiceTypingScreenState extends State<VoiceTypingScreen> {
-  SpeechService _speechService = SpeechService();
-  String _spokenText = "Tap the mic and start speaking...";
-
-  bool _isListening = false;
-
-  void _toggleListening() async {
-    if (_isListening) {
-      _speechService.stopListening();
-    } else {
-      bool available = await _speechService.initialize();
-      if (available) {
-        _speechService.startListening((text) {
-          setState(() {
-            _spokenText = text;
-          });
-        });
-      }
-    }
-    setState(() {
-      _isListening = !_isListening;
-    });
-  }
+class VoiceTypingScreen extends StatelessWidget {
+  final VoiceTypingController controller = Get.put(VoiceTypingController());
 
   @override
   Widget build(BuildContext context) {
@@ -39,21 +14,28 @@ class _VoiceTypingScreenState extends State<VoiceTypingScreen> {
           centerTitle: true,
           title: Text("Voice Typing")),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              _spokenText,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 24),
-            ),
+            Obx(() => Text(
+                  controller.recognizedText.value,
+                  style: TextStyle(fontSize: 22),
+                )),
             SizedBox(height: 20),
             FloatingActionButton(
-              backgroundColor: _isListening ? Colors.red : Colors.blue,
-              onPressed: _toggleListening,
+              backgroundColor: Colors.blue,
+              onPressed: controller.startListening,
               child: Icon(
-                _isListening ? Icons.mic_off : Icons.mic,
+                Icons.mic,
+                color: Colors.white,
+              ),
+            ),
+            FloatingActionButton(
+              backgroundColor: Colors.red,
+              onPressed: controller.stopListening,
+              child: Icon(
+                Icons.mic_off_outlined,
                 color: Colors.white,
               ),
             ),

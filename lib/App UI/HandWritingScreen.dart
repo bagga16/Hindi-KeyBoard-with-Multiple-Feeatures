@@ -1,7 +1,12 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+
+import 'package:google_ml_kit/google_ml_kit.dart';
+
+import 'dart:typed_data';
+import 'package:flutter/rendering.dart';
 import 'package:key_board_app/Services/HandwritingService.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
 
 class HandwritingScreen extends StatefulWidget {
   @override
@@ -10,64 +15,101 @@ class HandwritingScreen extends StatefulWidget {
 
 class _HandwritingScreenState extends State<HandwritingScreen> {
   final HandwritingService _handwritingService = HandwritingService();
-  String _recognizedText = "Draw Hindi characters or upload an image.";
-  File? _selectedImage;
-
-  Future<void> _pickImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
+  GlobalKey _globalKey = GlobalKey();
+  String _recognizedText = "Draw Hindi characters above";
+  Future<void> _processHandwrittenText() async {
+    try {
+      Uint8List? imageData = await _convertCanvasToImage();
+      String text =
+          await _handwritingService.recognizeHandwriting(imageData, 300, 300);
       setState(() {
-        _selectedImage = File(pickedFile.path);
+        _recognizedText = text.isNotEmpty ? text : "No Hindi text recognized.";
       });
-      _processImage(pickedFile.path);
+    } catch (e) {
+      print("Error processing handwriting: $e");
     }
   }
 
-  Future<void> _processImage(String imagePath) async {
-    String text = await _handwritingService.recognizeHandwriting(imagePath);
-    setState(() {
-      _recognizedText = text.isNotEmpty ? text : "No Hindi text recognized.";
-    });
+  Future<Uint8List?> _convertCanvasToImage() async {
+    try {
+      RenderRepaintBoundary? boundary = _globalKey.currentContext
+          ?.findRenderObject() as RenderRepaintBoundary?;
+
+      if (boundary == null) {
+        print("❌ Error: Render boundary is null!");
+        return null;
+      }
+
+      var image = await boundary.toImage(pixelRatio: 3.0); // High quality
+      ByteData? byteData =
+          await image.toByteData(format: ImageByteFormat.rawRgba);
+
+      if (byteData == null) {
+        print("❌ Error: ByteData conversion failed!");
+        return null;
+      }
+
+      return byteData.buffer.asUint8List();
+    } catch (e) {
+      print("❌ Error converting canvas to image: $e");
+      return null;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-          backgroundColor: Colors.white,
-          centerTitle: true,
-          title: Text("Handwriting Recognition")),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (_selectedImage != null)
-                Image.file(_selectedImage!, height: 150),
-              SizedBox(height: 25),
-              Padding(
-                padding: const EdgeInsets.only(left: 15.0),
-                child: Text(
-                  _recognizedText,
-                  textAlign: TextAlign.left,
-                  style: TextStyle(fontSize: 16),
+      appBar: AppBar(title: Text("Handwriting Recognition")),
+      body: Column(
+        children: [
+          RepaintBoundary(
+            key: _globalKey,
+            child: Column(
+              children: [
+                Text("Draw here"),
+                Container(
+                  height: 450,
+                  width: double.infinity,
+                  color: Colors.grey[200],
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      // Capture drawing input here
+                    },
+                    onPanEnd: (details) {
+                      _processHandwrittenText();
+                    },
+                    child: CustomPaint(
+                      painter: HandwritingPainter(),
+                    ),
+                  ),
                 ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    foregroundColor: Colors.white),
-                onPressed: _pickImage,
-                child: Text("Upload Handwritten Image"),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+          SizedBox(height: 20),
+          Text(
+            _recognizedText,
+            style: TextStyle(fontSize: 30),
+          ),
+        ],
       ),
     );
   }
+}
+
+class HandwritingPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Draw user's handwriting here
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+Future<String> recognizeText() async {
+  final inputImage = InputImage.fromFilePath("path_to_drawing_image");
+  final textRecognizer = GoogleMlKit.vision.textRecognizer();
+  final recognizedText = await textRecognizer.processImage(inputImage);
+  return recognizedText.text;
 }
